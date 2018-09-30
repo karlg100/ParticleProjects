@@ -8,6 +8,8 @@
 //#define BLYNK_DEBUG // Optional, this enables lots of prints
 //#define BLYNK_PRINT Serial
 
+ApplicationWatchdog wd(60000, System.reset);
+
 
 // Fridge
 #define DHTPIN D4         	        // Digital pin for communications
@@ -63,14 +65,12 @@ void handler(const char *topic, const char *data) {
 void getBlynkID() {
     //strcpy(sysID, System.deviceID());
 //    if (strcmp(deviceName, "basement_fridge") != 0)                                 // hunter_dentist
-    if (deviceName == "basement_fridge")
-        auth = "b8e3678ba54a4810bd0a7e7777c87df5";
-//    else if (strcmp(deviceName, "hunter_dentist") != 0)                             // bobcat_cowboy
+    if (deviceName == "basement_fridge_top")
+        auth = "5ef3e4b0994f413687c34c3777d94fa7";
+    else if (deviceName == "basement_fridge_bottom")
+        auth = "9a5f7f9576ea40e2931346ef204aa33d";
     else if (deviceName == "basement_freezer")
         auth = "b799f1e0d0b747a881a671f331e3da39";
-//    else if (strcmp(deviceName, "future_particle") != 0)                           // ?
-    else if (deviceName == "future_particle")
-        auth = "dc555ed10ca447f0b4e6540f6424629a";
     else {
       Particle.publish("debug", "unknown device - update getBlynkID() with new device name");
       auth = "unknown";
@@ -199,6 +199,12 @@ void loop() {
     blynkDash1 = new BlynkDashboard(deviceName, sensorCluster1, auth);
     initComplete = true;
   }
+
+  wd.checkin(); // resets the AWDT count
+
+  // reboot every 24 hours
+  //if (millis() > 86400000)
+  //  System.reset();
 }
 /*
     // Check if we need to start the next sample
