@@ -46,6 +46,7 @@ class BlynkDashboard {
         unsigned long blkLastAlarm = 0;
         unsigned long blkNextAlarm = 0;
         unsigned long lastChirp = 0;
+        unsigned long lastNotice = 0;
         int blinkCounter = 0;
         SensorSet* Sensor;
         //WidgetTerminal* terminal;
@@ -53,21 +54,21 @@ class BlynkDashboard {
 
         void blynkHumid(int pin) {
             float humid = Sensor->humid;
-            sprintf(tempInChar,"%0.2f", humid);
+            sprintf(tempInChar,"%0.1f", humid);
             sprintf(msg, "Humidity %0.2f %%", humid);
             if (debugLevel >= 2) terminal.println(msg);
             Blynk.virtualWrite(pin, tempInChar);
         }
 
         void blynkTemp(int pin) {
-            sprintf(tempInChar,"%0.2f", Sensor->temp);
+            sprintf(tempInChar,"%0.1f", Sensor->temp);
             Blynk.virtualWrite(pin, tempInChar);
             sprintf(msg, "Temperature %0.2f F", Sensor->temp);
             if (debugLevel >= 2) terminal.println(msg);
         }
 
         void blynkDewPoint(int pin) {
-            sprintf(tempInChar,"%0.2f", Sensor->dewPoint);
+            sprintf(tempInChar,"%0.1f", Sensor->dewPoint);
             Blynk.virtualWrite(pin, tempInChar);
             sprintf(msg, "Dew Point %0.2f F", Sensor->dewPoint);
             if (debugLevel >= 2) terminal.println(msg);
@@ -140,19 +141,22 @@ class BlynkDashboard {
             if (doorOpen > 0 && (millis()-doorOpen)/1000 > (float)doorAlarmThresh) {
                 sprintf(msg, "Door has been open for %d seconds", round((millis()-doorOpen)/1000));
                 if (debugLevel >= 1) terminal.println(msg);
-                alarmState = blynkNotify(msg);
+                alarmState = true;
+                blynkNotify(msg);
                 doChirp(1);
             }
-            if (Sensor->temp <= (float)tempAlarmThreshLow) {
+            if (Sensor->temp <= (float)tempAlarmThreshLow && round(Sensor->temp) != -3) {
                 sprintf(msg, "Temperature is too low! %0.2f F < %d F", Sensor->temp, tempAlarmThreshLow);
                 if (debugLevel >= 1) terminal.println(msg);
-                alarmState = blynkNotify(msg);
+                alarmState = true;
+                blynkNotify(msg);
                 doChirp(2);
             }
-            if (Sensor->temp >= (float)tempAlarmThreshHigh) {
+            if (Sensor->temp >= (float)tempAlarmThreshHigh && round(Sensor->temp) != -3) {
                 sprintf(msg, "Temperature is too high! %0.2f F > %d F", Sensor->temp, tempAlarmThreshHigh);
                 if (debugLevel >= 1) terminal.println(msg);
-                alarmState = blynkNotify(msg);
+                alarmState = true;
+                blynkNotify(msg);
                 doChirp(3);
             }
             if (alarmState == true) {
@@ -164,8 +168,8 @@ class BlynkDashboard {
                 sprintf(msg, "checkAlarms() - alarm state true, vars %d %d", blkLastAlarm, blkNextAlarm);
                 if (debugLevel >= 1) terminal.println(msg);
             } else {
-                blkLastAlarm = 0;
-                blkNextAlarm = 0;
+//                blkLastAlarm = 0;
+//                blkNextAlarm = 0;
                 if (debugLevel >= 1) terminal.println("checkAlarms() - no alarm states or blynk not connected");
             }
         }
