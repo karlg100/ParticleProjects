@@ -1,8 +1,8 @@
 /*
  * Project FridgeMon2_1
- * Description:
- * Author:
- * Date:
+ * Description: Fridge remote monitor system based on Particle
+ * Author: Karl Grindley
+ * Date: 2018-09-30
  */
 
 //#define BLYNK_DEBUG // Optional, this enables lots of prints
@@ -162,16 +162,6 @@ void setup()
     Particle.publish("particle/device/name");
 
     sensorCluster1 = new SensorSet("sensor1", DHTPIN, DHTTYPE, PHR, PHRPWR);
-/*
-    if (auth != "") {
-        static SensorSet fridge("Fridge", DHTPIN, DHTTYPE, PHR, PHRPWR);
-        static BlynkDashboard fridgeDash(&fridge, auth);
-        static Timer fridgeTimer(SAMPLE_INTERVAL, &SensorSet::callback, fridge);
-        static Timer fridgeDashTimer(UPDATE_INTERVAL, &BlynkDashboard::blynkService, fridgeDash);
-        fridgeTimer.start();
-        fridgeDashTimer.start();
-    }
-*/
 
     Serial.println("setup() - complete");
     Particle.publish("debug", "Setup() Complete");
@@ -206,38 +196,3 @@ void loop() {
   //if (millis() > 86400000)
   //  System.reset();
 }
-/*
-    // Check if we need to start the next sample
-        //Blynk.virtualWrite(V50, Time.format(Time.now(), TIME_FORMAT_DEFAULT));
-        //Blynk.virtualWrite(V51, Time.format(Time.now(), TIME_FORMAT_DEFAULT));
-        checkDoor(lightSensor);
-        controlDoorLED(lightSensor);
-
-        sprintf(msg,"doorOpen %d - %d seconds", doorOpen, round((millis()-doorOpen)/1000));
-        if (debugLevel >= 3) terminal.println(msg);
-        sprintf(msg,"tempAlarmThreshHigh %d F", tempAlarmThreshHigh);
-        if (debugLevel >= 3) terminal.println(msg);
-        sprintf(msg,"tempAlarmThreshLow %d F", tempAlarmThreshLow);
-        if (debugLevel >= 3) terminal.println(msg);
-        sprintf(msg,"doorAlarmThresh %d seconds", doorAlarmThresh);
-        if (debugLevel >= 3) terminal.println(msg);
-    }
-
-    while (blynkLightLevel(BLK_LIGHT) < DOOR_OPEN_LEVEL && DHTnextSampleTime < millis() && doorOpen == 0) {
-        int sleepFor = DHTnextSampleTime - millis();
-        sprintf(msg, "No light detected, Next attempt in %d milliseconds", sleepFor);
-        if (debugLevel >= 3) terminal.println(msg);
-        terminal.flush();
-        blynkDelay(100);
-    }
-
-    if (lightLevel() > DOOR_OPEN_LEVEL)
-        DHTnextSampleTime = millis();
-        //sprintf(msg, "Light detected [%0.1f] or door marked open, sample now", lightSensor);
-        //if (debugLevel == 1) terminal.println(msg);
-        //DHTnextSampleTime = millis();
-        //blynkDelay(100);
-      //}
-
-}
-    */
