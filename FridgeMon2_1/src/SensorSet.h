@@ -4,6 +4,8 @@
 //   - a single photoresistor
 // This class should be called by a timer to maintain the sample, one per cluster
 
+#define PUBLISH_INTERVAL  10000
+
 char VERSION[64] = "0.04";
 
 class SensorSet {
@@ -14,10 +16,11 @@ class SensorSet {
         int PRPin = 0;                              // Photo Resistor signal pin
         int PRPwrPin = 0;                           // Photo Resistor Power Pin
         bool bDHTstarted = false;		            // flag to indicate we started acquisition
+        unsigned long lastPublish = 0;
         PietteTech_DHT* DHT;
 
     public:
-        float temp = 0, humid = 0, dewPoint = 0, lightLevel = 0;   // our readings
+        float tempC = 0, temp = 0, humid = 0, dewPoint = 0, lightLevel = 0;   // our readings
         bool firstSample = false;
         char name[10];
 
@@ -54,6 +57,7 @@ class SensorSet {
     	    } else {
                 if (!DHT->acquiring()) {		// has sample completed?
                     //Serial.println("loop() - DHT sample acquiried");
+                    tempC = DHT->getCelsius();
                     temp = DHT->getFahrenheit();
                     humid = DHT->getHumidity();
                     dewPoint = DHT->getDewPoint();
@@ -78,7 +82,21 @@ class SensorSet {
     	    }
 	    }
 
+      void publishSamples() {
+          char msg[50];
+          if (millis() > lastPublish) {
+            sprintf(msg, "temperature=%0.0f", tempC);
+            Particle.publish("temp", msg);
+            sprintf(msg, "humidity=%0.0f", humid);
+            Particle.publish("humidity", msg);
+            sprintf(msg, "light=%0.0f", lightLevel);
+            Particle.publish("light", msg);
+            lastPublish = millis() + PUBLISH_INTERVAL;
+          }
+      }
+
 	    void callback() {
 	        sample();
+          publishSamples();
 	    }
 };
